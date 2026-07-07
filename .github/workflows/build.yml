@@ -1,0 +1,43 @@
+# بيعمل build تلقائي مع كل push، وبيرفع الـ jar الجاهز كـ artifact.
+# لو الـ push كان على tag شكله v1.0.0 هيعمل كمان Release فيه الملف
+# جاهز للتحميل مباشرة من صفحة الـ Releases بتاعة الريبو.
+
+name: build
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+      - name: validate gradle wrapper
+        uses: gradle/actions/wrapper-validation@v6
+      - name: setup jdk
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: build
+        run: ./gradlew build --stacktrace
+      - name: capture build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: swapfix-jar
+          path: build/libs/*.jar
+
+      - name: create release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/libs/*.jar
