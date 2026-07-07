@@ -2,6 +2,7 @@ package com.swapfix;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 
 /**
@@ -28,10 +29,11 @@ public final class SwapFixHandler {
     private SwapFixHandler() {}
 
     /**
-     * بتتنادى من الـ Mixin مباشرة جوه GLFW callback، يعني قبل أي
-     * معالجة تخص الـ tick بتاع ماين كرافت - أسرع ما يمكن.
+     * بتتنادى من الـ Mixin مباشرة جوه GLFW callback (Minecraft 1.21.9+
+     * بقى بيلف بيانات الزرار في كائن KeyEvent بدل أرقام منفصلة)،
+     * يعني قبل أي معالجة تخص الـ tick بتاع اللعبة - أسرع ما يمكن.
      */
-    public static void onRawKey(int key, int scancode, int action) {
+    public static void onRawKey(int action, KeyEvent event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.options == null) return;
 
@@ -42,7 +44,7 @@ public final class SwapFixHandler {
         boolean isRelease = action == 0; // GLFW_RELEASE
 
         // تتبع حالة زر سلوت 8
-        if (hotbar[SLOT_8_INDEX].matches(key, scancode)) {
+        if (hotbar[SLOT_8_INDEX].matches(event)) {
             if (isPress) {
                 slot8Held = true;
             } else if (isRelease) {
@@ -53,7 +55,7 @@ public final class SwapFixHandler {
         }
 
         // ضغطة سلوت 9 وسلوت 8 لسه متمسوكة = فعل السواب فورًا
-        if (hotbar[SLOT_9_INDEX].matches(key, scancode) && isPress && slot8Held) {
+        if (hotbar[SLOT_9_INDEX].matches(event) && isPress && slot8Held) {
             switchSlot(SLOT_9_INDEX);
             pendingReturnToSlot8 = true;
         }
@@ -74,7 +76,7 @@ public final class SwapFixHandler {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.getConnection() == null) return;
 
-        mc.player.getInventory().selected = index;
+        mc.player.getInventory().setSelectedSlot(index);
         mc.getConnection().send(new ServerboundSetCarriedItemPacket(index));
     }
 }
