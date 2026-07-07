@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "swapfix",
+	"version": "${version}",
+	"name": "Swap Fix",
+	"description": "بيحل مشكلة التأخير في تبديل السلوتات أثناء ضغطة سلوت 8 المطولة",
+	"authors": [
+		"AhmedGER"
+	],
+	"license": "CC0-1.0",
+	"icon": "assets/swapfix/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.swapfix.SwapFixClient"
+		]
+	},
+	"mixins": [
+		{
+			"config": "swapfix.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
